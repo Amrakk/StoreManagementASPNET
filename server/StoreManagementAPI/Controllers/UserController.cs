@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StoreManagementAPI.Services;
 
 namespace StoreManagementAPI.Controllers
 {
+    [Authorize]
+    [Route("api")]
     [ApiController]
     public class UserController : Controller
     {
