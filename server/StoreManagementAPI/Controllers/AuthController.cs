@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using StoreManagementAPI.Middlewares;
 using StoreManagementAPI.Models;
+using StoreManagementAPI.Models.RequestSchemas;
 using StoreManagementAPI.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace StoreManagementAPI.Controllers
 {
@@ -16,9 +12,11 @@ namespace StoreManagementAPI.Controllers
     {
         private readonly UserService _userService;
         private readonly JWTTokenService _tokenService;
+        private readonly ResetPasswordTokenService _rPTService;
 
-        public AuthController(UserService userService, JWTTokenService tokenService)
+        public AuthController(UserService userService, JWTTokenService tokenService, ResetPasswordTokenService rPTService)
         {
+            _rPTService = rPTService;
             _userService = userService;
             _tokenService = tokenService;
         }
@@ -53,6 +51,41 @@ namespace StoreManagementAPI.Controllers
             });
         }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromQuery(Name = "token")] string token, [FromBody] Dictionary<string, string> body)
+        {
+            string newPassword = body["newPassword"];
+            string confirmPassword = body["confirmPassword"];
+
+            if (string.IsNullOrEmpty(token))
+                return NotFound(new { message = "Invalid token" });
+
+            string? userId = await _rPTService.GetUserIdFromToken(token);
+            if (string.IsNullOrEmpty(userId))
+                return NotFound(new { message = "Invalid token" });
+
+            User user = await _userService.GetById(userId);
+            if (user == null)
+                return NotFound(new { message = "Invalid token" });
+
+            if (string.IsNullOrEmpty(newPassword))
+                return BadRequest(new { message = "Password not found" });
+
+            if (newPassword != confirmPassword)
+                return BadRequest(new { message = "Password and confirm password do not match" });
+
+            if (newPassword == user.Username)
+                return BadRequest(new { message = "Password must be different from the username" });
+
+            string hashedPassword = PasswordService.HashPassword(newPassword);
+            user.Password = hashedPassword;
+
+            bool isUpdated = await _userService.UpdateUser(user.Id, user);
+            if (!isUpdated)
+                return BadRequest(new { message = "Reset password failed" });
+
+            return Ok(new { message = "Reset password successfully. Please login again!", user });
+        }
 
         [HttpPost("validate")]
         public async Task<IActionResult> Validate([FromHeader(Name = "Authorization")] string token, [FromBody] Dictionary<string, string> body)
@@ -82,12 +115,5 @@ namespace StoreManagementAPI.Controllers
 
             return Ok(new { message = "Valid token", user });
         }
-
     }
-    public class LoginRequest
-    {
-        public string Username { get; set; } = "";
-        public string Password { get; set; } = "";
-    }
-
 }

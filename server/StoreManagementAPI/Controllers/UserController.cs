@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StoreManagementAPI.Middlewares;
 using StoreManagementAPI.Models;
+using StoreManagementAPI.Models.RequestSchemas;
 using StoreManagementAPI.Services;
 using System.Text.RegularExpressions;
 
@@ -41,7 +42,7 @@ namespace StoreManagementAPI.Controllers
 
         [HttpGet]
         [Route("admin/users/{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById([FromRoute] string id)
         {
             var user = await _userService.GetById(id);
             if (user == null)
@@ -50,7 +51,6 @@ namespace StoreManagementAPI.Controllers
             user.Password = "";
             return Ok(new { message = "Get user success", user = user });
         }
-
 
         [HttpPost]
         [Route("admin/users/create")]
@@ -111,13 +111,75 @@ namespace StoreManagementAPI.Controllers
             }
         }
 
+        [HttpPost("admin/users/update/{id}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UpdateUserRequest body)
+        {
+            try
+            {
+                string role = body.Role.ToUpper();
+                string status = body.Status.ToUpper();
+
+                Console.WriteLine(role);
+                Console.WriteLine(status);
+
+                if (string.IsNullOrEmpty(role) || string.IsNullOrEmpty(status))
+                    return BadRequest(new { message = "Please fill all fields" });
+
+                if (!_userService.IsValidRole(role))
+                    return BadRequest(new { message = "Invalid role" });
+
+                if (!_userService.IsValidStatus(status))
+                    return BadRequest(new { message = "Invalid status" });
+
+                User user = await _userService.GetById(id);
+                if (user == null)
+                    return BadRequest(new { message = "User not found" });
+
+                user.Role = Enum.Parse<Role>(role);
+                user.Status = Enum.Parse<Status>(status);
+
+                bool isUpdated = await _userService.UpdateUser(id, user);
+                if (!isUpdated)
+                    return BadRequest(new { message = "Update user failed" });
+
+                return Ok(new { message = "Update user success", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("admin/users/delete/{id}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        {
+            try
+            {
+                User user = await _userService.GetById(id);
+                if (user == null)
+                    return BadRequest(new { message = "User not found" });
+
+                if (user.Role == Role.OWNER)
+                    return BadRequest(new { message = "Cannot delete owner" });
+
+                bool isDeleted = await _userService.RemoveUser(id);
+                if (!isDeleted)
+                    return BadRequest(new { message = "Delete user failed" });
+
+                return Ok(new { message = "Delete user success", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}" });
+            }
+        }
+
         [HttpGet]
         [Route("admin/users/reset-password/{id}")]
         public async Task<ObjectResult> ResetPassword([FromRoute] string id)
         {
             try
             {
-                Console.WriteLine($"Reset password for user {id}");
                 User user = await _userService.GetById(id);
                 if (user == null)
                     return BadRequest(new { message = "User not found" });
@@ -137,11 +199,65 @@ namespace StoreManagementAPI.Controllers
             }
         }
 
-    }
+        [HttpPost("users/change-avatar/{id}")]
+        public async Task<IActionResult> ChangeAvatar([FromRoute] string id, [FromBody] ChangeAvatarRequest body)
+        {
+            try
+            {
+                string avatarUrl = body.AvatarUrl;
+                User user = await _userService.GetById(id);
+                if (user == null)
+                    return BadRequest(new { message = "User not found" });
 
-    public class CreateUserRequest
-    {
-        public string Email { get; set; } = "";
-        public string Role { get; set; } = "";
+                if (!Regex.IsMatch(avatarUrl, @"^https?://.*\.(?:png|jpg|jpeg|gif)$"))
+                    return BadRequest(new { message = "Invalid avatar url" });
+
+                user.Avatar = avatarUrl;
+                bool isUpdated = await _userService.UpdateUser(id, user);
+                if (!isUpdated)
+                    return BadRequest(new { message = "Change avatar failed" });
+
+                return Ok(new { message = "Change avatar success", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("users/change-password/{id}")]
+        public async Task<IActionResult> ChangePassword([FromRoute] string id, [FromBody] ResetPasswordRequest body)
+        {
+            try
+            {
+                string newPassword = body.NewPassword;
+                string confirmPassword = body.ConfirmPassword;
+
+                User user = await _userService.GetById(id);
+                if (user == null)
+                    return BadRequest(new { message = "User not found" });
+
+                if (string.IsNullOrEmpty(newPassword))
+                    return BadRequest(new { message = "Password is required" });
+
+                if (newPassword != confirmPassword)
+                    return BadRequest(new { message = "Confirm password not match" });
+
+                if (newPassword == user.Username)
+                    return BadRequest(new { message = "Password must be different from username" });
+
+                newPassword = PasswordService.HashPassword(newPassword);
+                user.Password = newPassword;
+                bool isUpdated = await _userService.UpdateUser(id, user);
+                if (!isUpdated)
+                    return BadRequest(new { message = "Change password failed" });
+
+                return Ok(new { message = "Change password success", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}" });
+            }
+        }
     }
 }
