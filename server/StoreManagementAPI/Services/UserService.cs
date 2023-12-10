@@ -2,27 +2,30 @@
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using StoreManagementAPI.Configs;
 
 namespace StoreManagementAPI.Services
 {
     public class UserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly string _defaultAvatarURL;
 
-        public UserService(IOptions<StoreManagementDBSettings> settings)
+        public UserService(IOptions<StoreManagementDBSettings> dbSettings, IOptions<AppSettings> appSettings)
         {
-            var client = new MongoClient(settings.Value.ConnectionString);
-            var database = client.GetDatabase(settings.Value.DatabaseName);
+            var client = new MongoClient(dbSettings.Value.ConnectionString);
+            var database = client.GetDatabase(dbSettings.Value.DatabaseName);
 
-            _users = database.GetCollection<User>(settings.Value.UsersCollectionName);
+            _users = database.GetCollection<User>(dbSettings.Value.UsersCollectionName);
+            _defaultAvatarURL = appSettings.Value.DefaultAvatarURL;
         }
 
-        public async Task<List<User>> Get()
+        public async Task<List<User>> GetAllUsers()
         {
             return await _users.Find(user => true).ToListAsync();
         }
 
-        public async Task<List<User>> Search(string search)
+        public async Task<List<User>> SearchUser(string search)
         {
             var filter = Builders<User>.Filter.Regex("Username", new BsonRegularExpression($".*{search}.*", "i"));
             return await _users.Find(filter).ToListAsync();
@@ -38,10 +41,13 @@ namespace StoreManagementAPI.Services
         public async Task<User> GetByUsername(string username) =>
             await _users.Find(user => user.Username == username).FirstOrDefaultAsync();
 
-        public async Task<bool> Create(User user)
+        public async Task<bool> AddUser(User user)
         {
             if(await GetByEmail(user.Email) != null)
                 return false;
+
+            user.Id = ObjectId.GenerateNewId().ToString();
+            user.Avatar = _defaultAvatarURL;
 
             await _users.InsertOneAsync(user);
             return true;
@@ -66,6 +72,10 @@ namespace StoreManagementAPI.Services
             return true;
         }
 
+        public bool IsValidRole(string role)
+        {
+            return Enum.TryParse(role, out Role result);
+        }
 
     }
 }

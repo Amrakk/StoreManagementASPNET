@@ -53,6 +53,7 @@ namespace StoreManagementAPI.Controllers
             });
         }
 
+
         [HttpPost("validate")]
         public async Task<IActionResult> Validate([FromHeader(Name = "Authorization")] string token, [FromBody] Dictionary<string, string> body)
         {
@@ -70,13 +71,12 @@ namespace StoreManagementAPI.Controllers
 
             if (resource.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
             {
-                if (!user.Role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) && !user.Role.Equals("OWNER", StringComparison.OrdinalIgnoreCase))
+                if (user.Role != Role.ADMIN && user.Role != Role.OWNER)
                     return StatusCode(StatusCodes.Status403Forbidden, new { message = "No permission" });
-               
             }
             else if (resource.Equals("OWNER", StringComparison.OrdinalIgnoreCase))
             {
-                if (!user.Role.Equals("OWNER", StringComparison.OrdinalIgnoreCase))
+                if (user.Role != Role.OWNER)
                     return StatusCode(StatusCodes.Status403Forbidden, new { message = "No permission" });
             }
 
@@ -89,4 +89,5 @@ namespace StoreManagementAPI.Controllers
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
     }
+
 }

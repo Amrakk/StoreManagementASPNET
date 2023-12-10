@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using StoreManagementAPI.Configs;
 using StoreManagementAPI.Middlewares;
-using StoreManagementAPI.Models;
 using StoreManagementAPI.Services;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -16,8 +17,17 @@ builder.Services.Configure<StoreManagementDBSettings>(
 builder.Services.Configure<JWTSettings>(
        builder.Configuration.GetSection("JWTSettings"));
 
+builder.Services.Configure<MailSettings>(
+          builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.Configure<AppSettings>(
+             builder.Configuration.GetSection("AppSettings"));
+
+
 builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<MailService>();
 builder.Services.AddSingleton<JWTTokenService>();
+builder.Services.AddSingleton<ResetPasswordTokenService>();
 
 builder.Services.AddAuthentication(x =>
 {
@@ -45,7 +55,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opt => { opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
