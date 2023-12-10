@@ -53,7 +53,7 @@ namespace StoreManagementAPI.Services
             return true;
         }
 
-        public async Task<bool> Update(string id, User userIn)
+        public async Task<bool> UpdateUser(string id, User userIn)
         {
             if(await GetById(id) == null)
                 return false;
@@ -63,7 +63,7 @@ namespace StoreManagementAPI.Services
         }
 
 
-        public async Task<bool> Remove(string id)
+        public async Task<bool> RemoveUser(string id)
         {
             if(await GetById(id) == null)
                 return false;
@@ -75,6 +75,11 @@ namespace StoreManagementAPI.Services
         public bool IsValidRole(string role)
         {
             return Enum.TryParse(role, out Role result);
+        }
+
+        public bool IsValidStatus(string status)
+        {
+            return Enum.TryParse(status, out Status result);
         }
 
     }
