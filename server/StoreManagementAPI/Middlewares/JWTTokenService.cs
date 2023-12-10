@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using StoreManagementAPI.Configs;
 using StoreManagementAPI.Models;
 using StoreManagementAPI.Services;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,7 +29,7 @@ namespace StoreManagementAPI.Middlewares
 
             claims.Add(new Claim(ClaimTypes.Email, user.Email));
             claims.Add(new Claim(ClaimTypes.Name, user.Username));
-            claims.Add(new Claim(ClaimTypes.Role, user.Role));
+            claims.Add(new Claim(ClaimTypes.Role, user.Role.ToString()));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -46,7 +47,6 @@ namespace StoreManagementAPI.Middlewares
 
         public string? ValidateToken(string token)
         {
-            Console.WriteLine(token);
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
 

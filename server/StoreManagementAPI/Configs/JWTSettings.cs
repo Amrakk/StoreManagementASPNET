@@ -1,4 +1,4 @@
-﻿namespace StoreManagementAPI.Models
+﻿namespace StoreManagementAPI.Configs
 {
     public class JWTSettings
     {

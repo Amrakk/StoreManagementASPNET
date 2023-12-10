@@ -1,12 +1,13 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 
 namespace StoreManagementAPI.Models
 {
     public class ResetPasswordToken
     {
-        [BsonId]
+        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = "";
@@ -17,5 +18,8 @@ namespace StoreManagementAPI.Models
         [BsonElement("expiryDate")]
         [BsonRepresentation(BsonType.DateTime)]
         public DateTime ExpiryDate { get; set; } = DateTime.Now;
+
+        [BsonElement("_class")]
+        public string _class { get; set; } = "";
     }
 }
