@@ -59,9 +59,8 @@ namespace StoreManagementAPI.Controllers
             try
             {
                 string email = body.Email;
-                string role = body.Role.ToUpper();
 
-                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(role))
+                if (string.IsNullOrEmpty(email))
                     return BadRequest(new { message = "Please fill all fields" });
 
                 string domain = _mailService.HOST.Split("smtp.")[1];
@@ -72,12 +71,6 @@ namespace StoreManagementAPI.Controllers
                 if (existingUser != null)
                     return BadRequest(new { message = "Email already exists" });
 
-                if (!_userService.IsValidRole(role))
-                    return BadRequest(new { message = "Invalid role" });
-
-                if (role == "OWNER")
-                    return BadRequest(new { message = "Cannot create owner" });
-
                 string username = email.Split('@')[0];
                 string password = PasswordService.HashPassword(username);
 
@@ -86,7 +79,7 @@ namespace StoreManagementAPI.Controllers
                     Email = email,
                     Username = username,
                     Password = password,
-                    Role = Enum.Parse<Role>(role),
+                    Role = Role.EMPLOYEE,
                     Status = Status.NORMAL,
                 };
 
@@ -118,9 +111,6 @@ namespace StoreManagementAPI.Controllers
             {
                 string role = body.Role.ToUpper();
                 string status = body.Status.ToUpper();
-
-                Console.WriteLine(role);
-                Console.WriteLine(status);
 
                 if (string.IsNullOrEmpty(role) || string.IsNullOrEmpty(status))
                     return BadRequest(new { message = "Please fill all fields" });
