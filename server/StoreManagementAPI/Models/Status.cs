@@ -2,7 +2,10 @@
 {
     public enum Status
     {
+        LOCKED,
         NORMAL,
-        LOCKED
+        PENDING,
+        COMPLETED,
+        FAILED
     }
 }
