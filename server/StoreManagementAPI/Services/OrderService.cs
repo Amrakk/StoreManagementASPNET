@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using StoreManagementAPI.Configs;
 using StoreManagementAPI.Models;
@@ -25,6 +26,113 @@ namespace StoreManagementAPI.Services
         public async Task<List<Order>> GetByCustomerId(string id)
         {
             return await _orders.Find(order => order.Customer.CustId == id).ToListAsync();
+        }
+
+        public Order? CreatePendingOrder(User user)
+        {
+            Order createdOrder = new Order();
+            createdOrder.User = user;
+            createdOrder.OrderStatus = Status.PENDING;
+            createdOrder.CreatedAt = DateTime.UtcNow;
+
+            try
+            {
+                _orders.InsertOne(createdOrder);
+                return createdOrder;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public Order? GetOrderByOID(string oid)
+        {
+            if (string.IsNullOrEmpty(oid) || oid.Length != 24 || !ObjectId.TryParse(oid, out _))
+            {
+                return null;
+            }
+
+            FilterDefinition<Order> filter = Builders<Order>.Filter.Eq(order => order.Oid, oid);
+            return _orders.Find(filter).FirstOrDefault();
+        }
+
+        public bool UpdateOrder(Order existingOrder)
+        {
+            try
+            {
+                var filter = Builders<Order>.Filter.Eq(o => o.Oid, existingOrder.Oid);
+                var updateDefinition = Builders<Order>.Update
+                    .Set(o => o.OrderProducts, existingOrder.OrderProducts)
+                    .Set(o => o.Customer, existingOrder.Customer)
+                    .Set(o => o.TotalPrice, existingOrder.TotalPrice)
+                    .Set(o => o.UpdatedAt, DateTime.UtcNow);
+
+                var result = _orders.UpdateOne(filter, updateDefinition);
+
+                return result.ModifiedCount > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public Order? UpdateOrderStatus(string orderId, Status newStatus)
+        {
+            Order existingOrder = _orders.Find(order => order.Oid == orderId).FirstOrDefault();
+
+            if (existingOrder != null)
+            {
+                existingOrder.UpdatedAt = DateTime.UtcNow;
+                existingOrder.OrderStatus = newStatus;
+
+                try
+                {
+                    _orders.ReplaceOne(order => order.Oid == orderId, existingOrder);
+                    return existingOrder;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        public List<Order> getOrderByStatus(Status? status)
+        {
+            if (status == null)
+            {
+                return _orders.Find(order => order.OrderStatus.Equals(status)).ToList();
+            }
+            else
+            {
+                return _orders.Find(_ => true).ToList();
+            }
+        }
+
+        public List<Order> GetOrdersByTimeAndStatus(DateTime startDate, DateTime endDate, Status? status)
+        {
+            var filterBuilder = Builders<Order>.Filter;
+            var dateFilter = filterBuilder.Gte("CreatedAt", startDate) & filterBuilder.Lte("CreatedAt", endDate);
+
+            FilterDefinition<Order> finalFilter;
+            if (status.HasValue)
+            {
+                var statusFilter = filterBuilder.Eq("OrderStatus", status.Value);
+                finalFilter = filterBuilder.And(dateFilter, statusFilter);
+            }
+            else
+            {
+                finalFilter = dateFilter;
+            }
+
+            return _orders.Find(finalFilter).ToList();
         }
     }
 }

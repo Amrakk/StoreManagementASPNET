@@ -13,6 +13,6 @@
         public string OrdersCollectionName { get; set; } = "";
         public string CustomersCollectionName { get; set; } = "";
         public string OrderProductsCollectionName { get; set; } = "";
-
+        public string PaymentCollectionName { get; set; } = "";
     }
 }

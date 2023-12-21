@@ -23,11 +23,12 @@ builder.Services.Configure<MailSettings>(
 builder.Services.Configure<AppSettings>(
              builder.Configuration.GetSection("AppSettings"));
 
-
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton<CustomerService>();
+builder.Services.AddSingleton<PaymentService>();
+builder.Services.AddSingleton<AnalyticsService>();
 
 builder.Services.AddSingleton<MailService>();
 builder.Services.AddSingleton<JWTTokenService>();
