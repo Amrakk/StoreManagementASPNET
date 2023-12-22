@@ -9,7 +9,7 @@ namespace StoreManagementAPI.Models
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string CustId { get; set; } = "";
+        public string? CustId { get; set; } = "";
 
         [BsonElement("name")]
         [BsonRepresentation(BsonType.String)]

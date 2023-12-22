@@ -9,7 +9,7 @@ namespace StoreManagementAPI.Models
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Pid { get; set; } = "";
+        public string? Pid { get; set; } = "";
 
         [BsonElement("name")]
         [BsonRepresentation(BsonType.String)]
@@ -43,7 +43,7 @@ namespace StoreManagementAPI.Models
 
         [BsonElement("createdAt")]
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
         [BsonElement("updatedAt")]
         [BsonRepresentation(BsonType.DateTime)]
