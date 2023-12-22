@@ -24,6 +24,8 @@ builder.Services.Configure<AppSettings>(
              builder.Configuration.GetSection("AppSettings"));
 
 
+builder.Services.AddSingleton<OrderProductsService>();
+
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<OrderService>();
 builder.Services.AddSingleton<ProductService>();
