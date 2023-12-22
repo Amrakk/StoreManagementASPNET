@@ -12,10 +12,10 @@ namespace StoreManagementAPI.Models
         public string Oid { get; set; } = "";
 
         [BsonElement("customer")]
-        public Customer Customer { get; set; } = new Customer();
+        public Customer? Customer { get; set; }
 
         [BsonElement("user")]
-        public User User { get; set; } = new User();
+        public User? User { get; set; }
 
         [BsonElement("totalPrice")]
         [BsonRepresentation(BsonType.Double)]
