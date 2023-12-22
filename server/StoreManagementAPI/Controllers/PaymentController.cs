@@ -5,7 +5,7 @@ using System.Net;
 
 namespace StoreManagementAPI.Controllers
 {
-    [Route("api/report")]
+    [Route("api/reports")]
     [ApiController]
     public class PaymentController : Controller
     {
