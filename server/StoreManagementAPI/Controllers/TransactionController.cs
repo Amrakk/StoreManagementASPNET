@@ -12,18 +12,83 @@ namespace StoreManagementAPI.Controllers
         private readonly OrderService _orderService;
         private readonly PaymentService _paymentService;
         private readonly ProductService _productService;
-        public TransactionController(OrderService orderService, PaymentService paymentService, ProductService productService) 
+        private readonly OrderProductsService _orderedProductService;
+        public TransactionController(OrderService orderService, OrderProductsService orderedProductService, PaymentService paymentService, ProductService productService) 
         {
             _orderService = orderService;
             _paymentService = paymentService;
             _productService = productService;
+            _orderedProductService = orderedProductService;
         }
+
+        // Order product
+        [HttpPost("order-products/create")]
+        public async Task<IActionResult> CreateOrderedProduct([FromBody] List<OrderProduct> orderedProducts)
+        {
+            try
+            {
+                List<OrderProduct> savedOrderProducts = new List<OrderProduct>();
+
+                foreach (OrderProduct orderProduct in orderedProducts)
+                {
+                    OrderProduct existingOrderProduct = await _orderedProductService.GetByProductIdAndOrderId(orderProduct.Oid, orderProduct.Pid);
+
+                    if (existingOrderProduct != null)
+                    {
+                        existingOrderProduct.Quantity += orderProduct.Quantity;
+
+                        OrderProduct? updatedOrderProduct = _orderedProductService.UpdateOrderProduct(existingOrderProduct);
+
+                        if (updatedOrderProduct != null)
+                        {
+                            savedOrderProducts.Add(updatedOrderProduct);
+                        }
+                    }
+                    else
+                    {
+                        OrderProduct? createdOrderProduct = _orderedProductService.CreateOrderProduct(orderProduct);
+                        
+                        if (createdOrderProduct != null)
+                        {
+                            savedOrderProducts.Add(createdOrderProduct);
+                        }
+                    }
+                }
+
+                if (savedOrderProducts.Count == 0)
+                {
+                    return Ok(new
+                    {
+                        code = HttpStatusCode.BadRequest,
+                        message = "Nothing added or updated",
+                        data = savedOrderProducts
+                    });
+                }
+
+                return Ok(new
+                {
+                    code = HttpStatusCode.Created,
+                    message = "Order products created/updated successfully",
+                    data = savedOrderProducts
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new
+                {
+                    code = HttpStatusCode.InternalServerError,
+                    message = e.Message
+                });
+            }
+        }
+
+        // End
 
         // Product
         [HttpGet("product/{pid}")]
-        public IActionResult GetProductByID([FromRoute] string pid)
+        public async Task<IActionResult> GetProductByID([FromRoute] string pid)
         {
-            Product product = _productService.GetProductByPID(pid);
+            var product = await _productService.GetById(pid);
 
             if (product == null)
             {
@@ -43,31 +108,23 @@ namespace StoreManagementAPI.Controllers
         }
 
         [HttpGet("search-name")]
-        public IActionResult GetProductByName([FromQuery] string productName)
+        public async Task<IActionResult> GetProductByName([FromQuery] string productName)
         {
-            Product product = _productService.GetProductByName(productName);
-
-            if (product == null)
-            {
-                return NotFound(new
-                {
-                    code = HttpStatusCode.NotFound,
-                    message = "Not Found"
-                });
-            }
+            List<Product> products = await _productService.FindProductByName(productName);
+            Console.WriteLine(products.Count);
 
             return Ok(new
             {
                 code = HttpStatusCode.OK,
                 message = "Success",
-                data = new List<Product> { product }
+                data = products
             });
         }
 
         [HttpGet("search-barcode")]
-        public IActionResult GetProductByBarCode([FromQuery] string barcode)
+        public async Task<IActionResult> GetProductByBarCode([FromQuery] string barcode)
         {
-            Product product = _productService.GetProductByBarcode(barcode);
+            var product = await _productService.GetByBarcode(barcode);
 
             if (product == null)
             {
@@ -82,7 +139,7 @@ namespace StoreManagementAPI.Controllers
             {
                 code = HttpStatusCode.OK,
                 message = "Success",
-                data = new List<Product> { product }
+                data = product
             });
         }
         // End
@@ -110,7 +167,7 @@ namespace StoreManagementAPI.Controllers
             });
         }
 
-        [HttpGet("{oid}")]
+        [HttpGet("orders/{oid}")]
         public IActionResult GetOrderByOID([FromRoute] string oid)
         {
             Order? foundOrder = _orderService.GetOrderByOID(oid);
@@ -132,7 +189,7 @@ namespace StoreManagementAPI.Controllers
             });
         }
 
-        [HttpPost("{oid}")]
+        [HttpPost("orders/{oid}")]
         public IActionResult UpdateOrder([FromBody] Order order)
         {
             if (order == null)
@@ -157,7 +214,6 @@ namespace StoreManagementAPI.Controllers
 
             existingOrder.OrderProducts = order.OrderProducts;
             existingOrder.Customer = order.Customer;
-            existingOrder.TotalPrice = order.TotalPrice;
 
             bool isUpdated = _orderService.UpdateOrder(existingOrder);
 
@@ -202,7 +258,7 @@ namespace StoreManagementAPI.Controllers
             }
         }
 
-        [HttpGet("{oid}/cash/success")]
+        [HttpGet("orders/{oid}/cash/success")]
         public IActionResult HandlePaymentSuccess(string oid)
         {
             Order? existingOrder = _orderService.GetOrderByOID(oid);

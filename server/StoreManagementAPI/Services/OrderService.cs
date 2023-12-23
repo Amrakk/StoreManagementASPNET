@@ -66,7 +66,7 @@ namespace StoreManagementAPI.Services
                 var updateDefinition = Builders<Order>.Update
                     .Set(o => o.OrderProducts, existingOrder.OrderProducts)
                     .Set(o => o.Customer, existingOrder.Customer)
-                    .Set(o => o.TotalPrice, existingOrder.TotalPrice)
+                    .Set(o => o.TotalPrice, CalculateTotalPrice(existingOrder.OrderProducts))
                     .Set(o => o.UpdatedAt, DateTime.UtcNow);
 
                 var result = _orders.UpdateOne(filter, updateDefinition);
@@ -134,5 +134,15 @@ namespace StoreManagementAPI.Services
 
             return _orders.Find(finalFilter).ToList();
         }
+
+        private double CalculateTotalPrice(List<OrderProduct> orderProducts)
+        {
+            return orderProducts == null ? 0 :
+                orderProducts
+                    .Select(orderProduct => orderProduct.RetailPrice * orderProduct.Quantity)
+                    .Where(price => !double.IsNaN(price) && !double.IsInfinity(price))
+                    .Sum();
+        }
+
     }
 }

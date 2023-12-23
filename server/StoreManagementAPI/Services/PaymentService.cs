@@ -41,10 +41,18 @@ namespace StoreManagementAPI.Services
 
         public List<Payment> GetPaymentByBetweenDate(DateTime startDate, DateTime endDate)
         {
-            var filterBuilder = Builders<Payment>.Filter;
-            var dateFilter = filterBuilder.Gte("PaymentTime", startDate) & filterBuilder.Lte("PaymentTime", endDate);
+            try
+            {
+                var filterBuilder = Builders<Payment>.Filter;
+                var dateFilter = filterBuilder.Gte("PaymentTime", startDate) & filterBuilder.Lte("PaymentTime", endDate);
 
-            return _payments.Find(dateFilter).ToList();
+                return _payments.Find(dateFilter).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new List<Payment>();
+            }
         }
 
     }
