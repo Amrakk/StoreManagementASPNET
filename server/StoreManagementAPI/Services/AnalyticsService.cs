@@ -48,6 +48,9 @@ namespace StoreManagementAPI.Services
                     break;
             }
 
+            start = start.AddHours(+7);
+            end = end.AddHours(+7);
+
             List<Payment>? paymentsAtTime = _paymentService?.GetPaymentByBetweenDate(start, end);
             List<Order>? orders = _orderService?.GetOrdersByTimeAndStatus(start, end, null);
 
