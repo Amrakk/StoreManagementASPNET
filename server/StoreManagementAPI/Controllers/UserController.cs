@@ -127,6 +127,9 @@ namespace StoreManagementAPI.Controllers
                 if (user == null)
                     return BadRequest(new { message = "User not found" });
 
+                if(user.Role == Role.OWNER && status.Equals(Status.LOCKED))
+                    return BadRequest(new { message = "Cannot lock owner" });
+
                 user.Role = Enum.Parse<Role>(role);
                 user.Status = Enum.Parse<Status>(status);
 
