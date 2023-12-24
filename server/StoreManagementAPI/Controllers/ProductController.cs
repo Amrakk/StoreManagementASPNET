@@ -52,9 +52,6 @@ namespace StoreManagementAPI.Controllers
             if((await _productService.GetByBarcode(product.Barcode)).Any())
                 return BadRequest(new ApiResponse<Product>(StatusCodes.Status400BadRequest, "Barcode already exists", new List<Product>()));
 
-            product.CreatedAt = DateTime.Now;
-            product.UpdatedAt = DateTime.Now;
-
             bool isCreated = await _productService.CreateProduct(product);
 
             if (!isCreated)
@@ -83,7 +80,7 @@ namespace StoreManagementAPI.Controllers
             productInDb.Category = product.Category;
             productInDb.Illustrator = product.Illustrator;
 
-            productInDb.UpdatedAt = DateTime.Now;
+            productInDb.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
                 
             bool isUpdated = await _productService.UpdateProduct(id, product);
 
