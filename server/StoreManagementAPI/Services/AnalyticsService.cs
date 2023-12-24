@@ -28,19 +28,18 @@ namespace StoreManagementAPI.Services
                     break;
                 case "last7days":
                     start = now.Date.AddDays(-7);
-                    end = now.Date;
+                    end = now.Date.AddDays(1);
                     break;
                 case "thismonth":
                     start = new DateTime(now.Year, now.Month, 1);
-                    end = now.Date;
+                    end = now.Date.AddDays(1);
                     break;
                 case "custom":
                     if (startDate == null || endDate == null)
-                    {
                         return null;
-                    }
+
                     start = startDate.Value.Date;
-                    end = endDate.Value.Date;
+                    end = endDate.Value.Date.AddDays(1);
                     break;
                 default:
                     start = now.Date;
