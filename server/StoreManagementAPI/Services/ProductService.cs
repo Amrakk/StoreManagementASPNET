@@ -42,6 +42,7 @@ namespace StoreManagementAPI.Services
         public async Task<bool> CreateProduct(Product product)
         {
             product.Pid = ObjectId.GenerateNewId().ToString();
+            product.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
             await _products.InsertOneAsync(product);
             return true;
         }
@@ -55,7 +56,7 @@ namespace StoreManagementAPI.Services
 
             productIn.Pid = product.Pid;
             productIn.CreatedAt = product.CreatedAt;
-            productIn.UpdatedAt = DateTime.Now;
+            productIn.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
 
             await _products.ReplaceOneAsync(product => product.Pid == id, productIn);
             return true;
