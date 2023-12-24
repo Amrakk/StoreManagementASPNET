@@ -17,9 +17,7 @@ namespace StoreManagementAPI.Services
 
         public AnalyticsReport? GetReportByTimeline(string timeline, DateTime? startDate = null, DateTime? endDate = null)
         {
-            DateTime now = DateTime.UtcNow.AddHours(7);
-
-            Console.WriteLine("NOW: " + now);
+            DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
             DateTime start, end;
 
             switch (timeline.ToLower())

@@ -33,8 +33,7 @@ namespace StoreManagementAPI.Services
             Order createdOrder = new Order();
             createdOrder.User = user;
             createdOrder.OrderStatus = Status.PENDING;
-            createdOrder.CreatedAt = DateTime.UtcNow;
-
+            createdOrder.CreatedAt = DateTime.UtcNow.AddHours(7);
             try
             {
                 _orders.InsertOne(createdOrder);
@@ -66,8 +65,8 @@ namespace StoreManagementAPI.Services
                 var updateDefinition = Builders<Order>.Update
                     .Set(o => o.OrderProducts, existingOrder.OrderProducts)
                     .Set(o => o.Customer, existingOrder.Customer)
-                    .Set(o => o.TotalPrice, CalculateTotalPrice(existingOrder.OrderProducts))
-                    .Set(o => o.UpdatedAt, DateTime.UtcNow);
+                    .Set(o => o.TotalPrice, Math.Round(CalculateTotalPrice(existingOrder.OrderProducts), 2))
+                    .Set(o => o.UpdatedAt, DateTime.UtcNow.AddHours(7));
 
                 var result = _orders.UpdateOne(filter, updateDefinition);
 
@@ -86,7 +85,7 @@ namespace StoreManagementAPI.Services
 
             if (existingOrder != null)
             {
-                existingOrder.UpdatedAt = DateTime.UtcNow;
+                DateTime.UtcNow.AddHours(7);
                 existingOrder.OrderStatus = newStatus;
 
                 try

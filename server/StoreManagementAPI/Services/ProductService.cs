@@ -58,7 +58,7 @@ namespace StoreManagementAPI.Services
 
             productIn.Pid = product.Pid;
             productIn.CreatedAt = product.CreatedAt;
-            productIn.UpdatedAt = DateTime.Now;
+            productIn.UpdatedAt = DateTime.UtcNow.AddHours(7);
 
             await _products.ReplaceOneAsync(product => product.Pid == id, productIn);
             return true;
