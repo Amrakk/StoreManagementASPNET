@@ -28,5 +28,55 @@ namespace StoreManagementAPI.Services
             var filter = Builders<OrderProduct>.Filter.Regex("pid", new BsonRegularExpression(id));
             return await _orderProducts.Find(filter).ToListAsync();
         }
+
+        public async Task<OrderProduct> GetByProductIdAndOrderId(string pid, string oid)
+        {
+            var filter = Builders<OrderProduct>.Filter.And(
+                Builders<OrderProduct>.Filter.Regex("pid", new BsonRegularExpression(pid)),
+                Builders<OrderProduct>.Filter.Regex("oid", new BsonRegularExpression(oid))
+            );
+
+            return await _orderProducts.Find(filter).FirstOrDefaultAsync();
+        }
+
+        public OrderProduct? CreateOrderProduct(OrderProduct orderProduct)
+        {
+            try
+            {
+                _orderProducts.InsertOne(orderProduct);
+                return orderProduct;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public OrderProduct? UpdateOrderProduct(OrderProduct existingOrderProduct)
+        {
+            try
+            {
+                var filter = Builders<OrderProduct>.Filter.Eq(op => op.Id, existingOrderProduct.Id);
+                var update = Builders<OrderProduct>.Update
+                    .Set(op => op.Quantity, existingOrderProduct.Quantity);
+
+                var result = _orderProducts.UpdateOne(filter, update);
+
+                if (result.ModifiedCount > 0)
+                {
+                    return existingOrderProduct;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to update order product: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

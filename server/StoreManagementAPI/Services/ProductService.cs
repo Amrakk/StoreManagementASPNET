@@ -71,6 +71,5 @@ namespace StoreManagementAPI.Services
             await _products.DeleteOneAsync(product => product.Pid == id);
             return true;
         }
-
     }
 }
