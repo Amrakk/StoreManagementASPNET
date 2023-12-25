@@ -22,6 +22,7 @@ namespace StoreManagementAPI.Models
         [BsonElement("paymentTime")]
         public DateTime PaymentTime { get; set; }
         [BsonElement("status")]
+        [BsonRepresentation(BsonType.String)]
         public Status Status { get; set; }
         [BsonElement("_class")]
         public string _class { get; set; } = "";
