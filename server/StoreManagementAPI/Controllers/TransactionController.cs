@@ -111,7 +111,6 @@ namespace StoreManagementAPI.Controllers
         public async Task<IActionResult> GetProductByName([FromQuery] string productName)
         {
             List<Product> products = await _productService.FindProductByName(productName);
-            Console.WriteLine(products.Count);
 
             return Ok(new
             {
