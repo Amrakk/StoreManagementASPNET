@@ -24,15 +24,15 @@ namespace StoreManagementAPI.Services
             {
                 case "yesterday":
                     start = now.Date.AddDays(-1);
-                    end = now.Date.AddDays(1);
+                    end = now.Date;
                     break;
                 case "last7days":
-                    start = now.Date.AddDays(-7);
-                    end = now.Date.AddDays(1);
+                    start = now.Date.AddDays(-6);
+                    end = now.Date;
                     break;
                 case "thismonth":
                     start = new DateTime(now.Year, now.Month, 1);
-                    end = now.Date.AddDays(1);
+                    end = now.Date;
                     break;
                 case "custom":
                     if (startDate == null || endDate == null)
