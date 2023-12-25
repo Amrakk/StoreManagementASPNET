@@ -74,5 +74,13 @@ namespace StoreManagementAPI.Services
             await _products.DeleteOneAsync(product => product.Pid == id);
             return true;
         }
+
+        public long GetTotalProduct()
+        {
+            var filter = Builders<Product>.Filter.Empty;
+            var totalCount = _products.CountDocuments(filter);
+
+            return totalCount;
+        }
     }
 }

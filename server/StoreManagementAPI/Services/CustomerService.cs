@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using StoreManagementAPI.Configs;
 using StoreManagementAPI.Models;
+using System.Net;
 
 namespace StoreManagementAPI.Services
 {
@@ -76,6 +78,14 @@ namespace StoreManagementAPI.Services
                 return true;
             }
             catch { return false; }
+        }
+
+        public long GetTotalCustomer()
+        {
+            var filter = Builders<Customer>.Filter.Empty;
+            var totalCount = _customers.CountDocuments(filter);
+
+            return totalCount;
         }
     }
 }

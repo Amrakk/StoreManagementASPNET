@@ -143,5 +143,14 @@ namespace StoreManagementAPI.Services
                     .Sum();
         }
 
+        public long GetTotalOrder()
+        {
+            var filter = Builders<Order>.Filter.Empty;
+            var totalCount = _orders.CountDocuments(filter);
+
+            return totalCount;
+        }
     }
+    
+
 }

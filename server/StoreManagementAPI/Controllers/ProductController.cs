@@ -107,7 +107,16 @@ namespace StoreManagementAPI.Controllers
 
             return Ok(new ApiResponse<Product>(StatusCodes.Status200OK, "Delete product success", new List<Product>() { product }));
         }
-        
 
+        [HttpGet("total")]
+        public IActionResult GetTotalProduct()
+        {
+            return Ok(new
+            {
+                code = HttpStatusCode.OK,
+                message = "Success",
+                data = new List<long> { _productService.GetTotalProduct() }
+            });
+        }
     }
 }
