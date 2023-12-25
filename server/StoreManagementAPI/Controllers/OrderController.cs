@@ -16,7 +16,7 @@ namespace StoreManagementAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetOrders([FromQuery] string customerId)
+        public async Task<IActionResult> GetOrders([FromQuery] string customerId = "")
         {
             List<Order> orders;
 
@@ -29,6 +29,17 @@ namespace StoreManagementAPI.Controllers
                 return NotFound(new ApiResponse<Order>(StatusCodes.Status404NotFound, "Not Found", new List<Order>()));
 
             return Ok(new ApiResponse<Order>(StatusCodes.Status200OK, "Success", orders));
+        }
+
+        [HttpGet("total")]
+        public IActionResult GetTotalOrder()
+        {
+            return Ok(new
+            {
+                code = HttpStatusCode.OK,
+                message = "Success",
+                data = new List<long> { _orderService.GetTotalOrder() }
+            });
         }
     }
 }

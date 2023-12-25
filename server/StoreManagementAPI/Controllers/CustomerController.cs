@@ -122,5 +122,15 @@ namespace StoreManagementAPI.Controllers
             return Ok(new ApiResponse<Customer>(StatusCodes.Status200OK, "Success", new List<Customer> { customer }));
         }
 
+        [HttpGet("total")]
+        public IActionResult GetTotalCustomer()
+        {
+            return Ok(new
+            {
+                code = HttpStatusCode.OK,
+                message = "Success",
+                data = new List<long> { _customerService.GetTotalCustomer() }
+            });
+        }
     }
 }

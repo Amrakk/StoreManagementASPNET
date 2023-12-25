@@ -82,5 +82,13 @@ namespace StoreManagementAPI.Services
             return Enum.TryParse(status, out Status result);
         }
 
+        public long GetTotalUser()
+        {
+            var filter = Builders<User>.Filter.Empty;
+            var totalCount = _users.CountDocuments(filter);
+
+            return totalCount;
+
+        }
     }
 }

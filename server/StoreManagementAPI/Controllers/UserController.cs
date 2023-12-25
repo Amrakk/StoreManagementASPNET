@@ -4,6 +4,7 @@ using StoreManagementAPI.Middlewares;
 using StoreManagementAPI.Models;
 using StoreManagementAPI.Models.RequestSchemas;
 using StoreManagementAPI.Services;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace StoreManagementAPI.Controllers
@@ -254,5 +255,17 @@ namespace StoreManagementAPI.Controllers
                 return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}" });
             }
         }
+
+        [HttpGet("users/total")]
+        public IActionResult GetTotalUser()
+        {
+            return Ok(new
+            {
+                code = HttpStatusCode.OK,
+                message = "Success",
+                data = new List<long> { _userService.GetTotalUser() }
+            });
+        }
+
     }
 }
