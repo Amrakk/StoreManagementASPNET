@@ -43,10 +43,13 @@ namespace StoreManagementAPI.Models
 
         [BsonElement("createdAt")]
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTime? CreatedAt { get; set; } = DateTime.Now;
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime? CreatedAt { get; set; } = DateTime.SpecifyKind(
+                                                    TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local), DateTimeKind.Utc);
 
         [BsonElement("updatedAt")]
         [BsonRepresentation(BsonType.DateTime)]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime? UpdatedAt { get; set; } = null;
 
         [BsonElement("_class")]

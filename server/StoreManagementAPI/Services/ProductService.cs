@@ -35,14 +35,16 @@ namespace StoreManagementAPI.Services
             
         public async Task<List<Product>> GetByBarcode(string barcode)
         {
-            var filter = Builders<Product>.Filter.Regex("Barcode", new BsonRegularExpression(barcode));
+            var filter = Builders<Product>.Filter.Eq("Barcode", barcode);
             return await _products.Find(filter).ToListAsync();
         }
 
         public async Task<bool> CreateProduct(Product product)
         {
             product.Pid = ObjectId.GenerateNewId().ToString();
-            product.CreatedAt = DateTime.UtcNow.AddHours(7);
+            product.CreatedAt = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local), DateTimeKind.Utc);
+            product.UpdatedAt = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local), DateTimeKind.Utc);
+
             await _products.InsertOneAsync(product);
             return true;
         }

@@ -27,8 +27,7 @@ namespace StoreManagementAPI.Middlewares
 
             var claims = new List<Claim>();
 
-            claims.Add(new Claim(ClaimTypes.Email, user.Email));
-            claims.Add(new Claim(ClaimTypes.Name, user.Username));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Email));
             claims.Add(new Claim(ClaimTypes.Role, user.Role.ToString()));
 
             var tokenDescriptor = new SecurityTokenDescriptor
