@@ -17,7 +17,7 @@ namespace StoreManagementAPI.Services
 
         public AnalyticsReport? GetReportByTimeline(string timeline, DateTime? startDate = null, DateTime? endDate = null)
         {
-            DateTime now = DateTime.UtcNow.AddHours(7);
+            DateTime now = DateTime.UtcNow.AddHours(+7);
             DateTime start, end;
 
             switch (timeline.ToLower())
@@ -27,7 +27,7 @@ namespace StoreManagementAPI.Services
                     end = now.Date;
                     break;
                 case "last7days":
-                    start = now.Date.AddDays(-7);
+                    start = now.Date.AddDays(-6);
                     end = now.Date.AddDays(1);
                     break;
                 case "thismonth":
@@ -46,9 +46,6 @@ namespace StoreManagementAPI.Services
                     end = now.Date.AddDays(1);
                     break;
             }
-
-            start = start.AddHours(+7);
-            end = end.AddHours(+7);
 
             List<Payment>? paymentsAtTime = _paymentService?.GetPaymentByBetweenDate(start, end);
             List<Order>? orders = _orderService?.GetOrdersByTimeAndStatus(start, end, null);
