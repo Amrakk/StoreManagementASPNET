@@ -25,12 +25,14 @@ namespace StoreManagementAPI.Controllers
 
         [HttpGet]
         [Route("admin/users")]
-        public async Task<IActionResult> GetUsers([FromQuery(Name = "text")] string searchText = "")
+        public async Task<IActionResult> GetUsers([FromQuery(Name = "text")] string searchText = "", [FromQuery(Name = "email")] string email = "")
         {
             IEnumerable<User> users;
 
             if (!string.IsNullOrEmpty(searchText))
                 users = await _userService.SearchUser(searchText);
+            else if(!string.IsNullOrEmpty(email))
+                users = new List<User>() { await _userService.GetByEmail(email) };
             else
                 users = await _userService.GetAllUsers();
 
@@ -124,6 +126,9 @@ namespace StoreManagementAPI.Controllers
                 User user = await _userService.GetById(id);
                 if (user == null)
                     return BadRequest(new { message = "User not found" });
+
+                if(user.Role == Role.OWNER && status.Equals(Status.LOCKED))
+                    return BadRequest(new { message = "Cannot lock owner" });
 
                 user.Role = Enum.Parse<Role>(role);
                 user.Status = Enum.Parse<Status>(status);

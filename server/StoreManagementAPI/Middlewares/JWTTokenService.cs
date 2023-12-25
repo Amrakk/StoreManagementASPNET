@@ -32,11 +32,12 @@ namespace StoreManagementAPI.Middlewares
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
+                Issuer = "self",
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddSeconds(_seconds),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
+                    SecurityAlgorithms.HmacSha512Signature
                 )
             };
 
@@ -63,7 +64,7 @@ namespace StoreManagementAPI.Middlewares
                 var jwtToken = (JwtSecurityToken)validatedToken;
 
                 if (jwtToken.Claims.Any())
-                    return jwtToken.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
+                    return jwtToken.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
 
                 return null;
             }

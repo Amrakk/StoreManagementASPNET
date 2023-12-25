@@ -80,8 +80,6 @@ namespace StoreManagementAPI.Controllers
             productInDb.Category = product.Category;
             productInDb.Illustrator = product.Illustrator;
 
-            productInDb.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.Local);
-                
             bool isUpdated = await _productService.UpdateProduct(id, product);
 
             if (!isUpdated)
