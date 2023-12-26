@@ -22,12 +22,6 @@ The server is responsible for handling API requests. To interact with the server
 
 [http://localhost:8080/api](http://localhost:8080/api)
 
-## Demo
-
-Check out the demo to see the Store Management System in action. The demo showcases key features and functionality.
-
-[Demo Link](https://drive.google.com/drive/folders/1PyBtCtcs2ouoTi5fr-9sydm0gCYaasED?usp=sharing)
-
 ## Getting Started
 
 Follow these steps to set up and run the Store Management System locally:
